@@ -28,7 +28,7 @@ data:
 
             # reverse proxy
             location / {
-                proxy_pass                         {{ .backend }};
+                proxy_pass                         {{ .backend }}$request_uri;
                 proxy_set_header Host              $host;
                 proxy_http_version                 1.1;
                 proxy_cache_bypass                 $http_upgrade;
