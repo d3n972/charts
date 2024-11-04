@@ -35,6 +35,5 @@ spec:
                   name: {{ print "svc-" .name | trunc 63 | trimSuffix "-" }}
                   port:
                     number: 80
-                    v: {{.}}
     {{- end }}
 {{- end }}

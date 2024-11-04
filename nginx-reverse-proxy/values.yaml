@@ -32,8 +32,7 @@ podAnnotations: {}
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 podLabels: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext: {} # fsGroup: 2000
 
 securityContext: {}
   # capabilities:
@@ -58,34 +57,33 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - name: "proxy1"
-      host: "http://foo.dn.sv"
-      backend: "http://localhost:3000"
-      port: 3000
-    - name: "proxy2"
-      host: "http://bar.dn.sv"
-      backend: "http://localhost:3002"
-      port: 3002
+  - name: "proxy1"
+    host: "foo.dn.sv"
+    backend: "http://my-grafana.monitoring.svc.cluster.local"
+    port: 3000
+  - name: "proxy2"
+    host: "bar.dn.sv"
+    backend: "http://localhost:3002"
+    port: 3002
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
-resources: 
+resources:
   limits:
-     cpu: 100m
-     memory: 128Mi
+    cpu: 500m
+    memory: 1280Mi
   requests:
-     cpu: 100m
-     memory: 128Mi
+    cpu: 100m
+    memory: 1280Mi
 
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
-
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: http

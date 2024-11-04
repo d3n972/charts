@@ -9,11 +9,11 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{.port}}
+    - port: 80
       targetPort: http
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ print "nginx-reverse-proxy-" .name | trunc 63 | trimSuffix "-" }}
+      {{- include "nginx-reverse-proxy.labels" . | nindent 8 }}
 ---
 {{- end }}

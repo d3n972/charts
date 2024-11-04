@@ -1,28 +1,51 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-ingress
+  name: {{ include "nginx-reverse-proxy.fullname" . }}
   labels:
-  {{- include "nginx-reverse-proxy.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- include "nginx-reverse-proxy.labels" . | nindent 4 }}
 spec:
-  rules:
-  {{- range .Values.ingress.hosts }}
-  - host: {{ .host }}
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ print "svc-" .name | trunc 63 | trimSuffix "-" }}
-            port:
-              number: {{ .port }}
-  {{- end }}
-  # tls:
-  # - hosts:
-  #   - {{ .Values.ingress.host }}
-  #   secretName: {{ .Values.ingress.tlsSecret }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "nginx-reverse-proxy.labels" . | nindent 8 }}
+  template:
+    metadata:
+      labels:
+      {{- include "nginx-reverse-proxy.labels" . | nindent 12 }}
+    spec:
+      serviceAccountName: ngp-sa
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nginx-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:latest"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nginx/conf.d/vhost.conf #/etc/nginx/nginx.conf
+              subPath: nginx.conf
+      

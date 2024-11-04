@@ -1,0 +1,309 @@
+---
+# Source: nginx-reverse-proxy/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ngp-sa
+  labels:
+    app.kubernetes.io/version: "1"
+    app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+automountServiceAccountToken: true
+---
+# Source: nginx-reverse-proxy/templates/cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: default
+data:
+  nginx.conf: |
+        server {
+            listen                               80; #443 ssl http2;
+            listen                               [::]:80; #443 ssl http2;
+            server_name                          foo.dn.sv;
+            root                                 /var/www/example.com/public;
+
+            # SSL
+            # ssl_certificate                      /etc/letsencrypt/live/example.com/fullchain.pem;
+            # ssl_certificate_key                  /etc/letsencrypt/live/example.com/privkey.pem;
+            # ssl_trusted_certificate              /etc/letsencrypt/live/example.com/chain.pem;
+
+            # security headers
+            add_header X-XSS-Protection          "1; mode=block" always;
+            add_header X-Content-Type-Options    "nosniff" always;
+            add_header Referrer-Policy           "no-referrer-when-downgrade" always;
+            add_header Content-Security-Policy   "default-src 'self' http: https: ws: wss: data: blob: 'unsafe-inline'; frame-ancestors 'self';" always;
+            add_header Permissions-Policy        "interest-cohort=()" always;
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+            # . files
+            location ~ /\.(?!well-known) {
+                deny all;
+            }
+
+            # logging
+            # access_log /var/log/nginx/access.log combined buffer=512k flush=1m;
+            # error_log  /var/log/nginx/error.log warn;
+
+            # reverse proxy
+            location / {
+                proxy_pass                         http://my-grafana.monitoring.svc.cluster.local;
+                proxy_set_header Host              $host;
+                proxy_http_version                 1.1;
+                proxy_cache_bypass                 $http_upgrade;
+
+                # Proxy SSL
+                proxy_ssl_server_name              on;
+
+                # Proxy headers
+                # proxy_set_header Upgrade           $http_upgrade;
+                # proxy_set_header X-Real-IP         $remote_addr;
+                # proxy_set_header Forwarded         $proxy_add_forwarded;
+                # proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header X-Forwarded-Host  $host;
+                proxy_set_header X-Forwarded-Port  $server_port;
+
+                # Proxy timeouts
+                proxy_connect_timeout              60s;
+                proxy_send_timeout                 60s;
+                proxy_read_timeout                 60s;
+            }
+
+            # favicon.ico
+            location = /favicon.ico {
+                log_not_found off;
+            }
+
+            # robots.txt
+            location = /robots.txt {
+                log_not_found off;
+            }
+
+            # assets, media
+            location ~* \.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|webp|tiff?|mp3|m4a|aac|ogg|midi?|wav|mp4|mov|webm|mpe?g|avi|ogv|flv|wmv)$ {
+                expires 7d;
+            }
+
+            # svg, fonts
+            location ~* \.(?:svgz?|ttf|ttc|otf|eot|woff2?)$ {
+                add_header Access-Control-Allow-Origin "*";
+                expires    7d;
+            }
+
+            # gzip
+            gzip            on;
+            gzip_vary       on;
+            gzip_proxied    any;
+            gzip_comp_level 6;
+            gzip_types      text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml;
+        }
+        server {
+            listen                               80; #443 ssl http2;
+            listen                               [::]:80; #443 ssl http2;
+            server_name                          bar.dn.sv;
+            root                                 /var/www/example.com/public;
+
+            # SSL
+            # ssl_certificate                      /etc/letsencrypt/live/example.com/fullchain.pem;
+            # ssl_certificate_key                  /etc/letsencrypt/live/example.com/privkey.pem;
+            # ssl_trusted_certificate              /etc/letsencrypt/live/example.com/chain.pem;
+
+            # security headers
+            add_header X-XSS-Protection          "1; mode=block" always;
+            add_header X-Content-Type-Options    "nosniff" always;
+            add_header Referrer-Policy           "no-referrer-when-downgrade" always;
+            add_header Content-Security-Policy   "default-src 'self' http: https: ws: wss: data: blob: 'unsafe-inline'; frame-ancestors 'self';" always;
+            add_header Permissions-Policy        "interest-cohort=()" always;
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+            # . files
+            location ~ /\.(?!well-known) {
+                deny all;
+            }
+
+            # logging
+            # access_log /var/log/nginx/access.log combined buffer=512k flush=1m;
+            # error_log  /var/log/nginx/error.log warn;
+
+            # reverse proxy
+            location / {
+                proxy_pass                         http://localhost:3002;
+                proxy_set_header Host              $host;
+                proxy_http_version                 1.1;
+                proxy_cache_bypass                 $http_upgrade;
+
+                # Proxy SSL
+                proxy_ssl_server_name              on;
+
+                # Proxy headers
+                # proxy_set_header Upgrade           $http_upgrade;
+                # proxy_set_header X-Real-IP         $remote_addr;
+                # proxy_set_header Forwarded         $proxy_add_forwarded;
+                # proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header X-Forwarded-Host  $host;
+                proxy_set_header X-Forwarded-Port  $server_port;
+
+                # Proxy timeouts
+                proxy_connect_timeout              60s;
+                proxy_send_timeout                 60s;
+                proxy_read_timeout                 60s;
+            }
+
+            # favicon.ico
+            location = /favicon.ico {
+                log_not_found off;
+            }
+
+            # robots.txt
+            location = /robots.txt {
+                log_not_found off;
+            }
+
+            # assets, media
+            location ~* \.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|webp|tiff?|mp3|m4a|aac|ogg|midi?|wav|mp4|mov|webm|mpe?g|avi|ogv|flv|wmv)$ {
+                expires 7d;
+            }
+
+            # svg, fonts
+            location ~* \.(?:svgz?|ttf|ttc|otf|eot|woff2?)$ {
+                add_header Access-Control-Allow-Origin "*";
+                expires    7d;
+            }
+
+            # gzip
+            gzip            on;
+            gzip_vary       on;
+            gzip_proxied    any;
+            gzip_comp_level 6;
+            gzip_types      text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml;
+        }
+---
+# Source: nginx-reverse-proxy/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+# map[backend:http://my-grafana.monitoring.svc.cluster.local host:foo.dn.sv name:proxy1 port:3000]
+  name: svc-proxy1
+  labels:
+    app.kubernetes.io/version: "1"
+    app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+        app.kubernetes.io/version: "1"
+        app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+---
+# Source: nginx-reverse-proxy/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+# map[backend:http://localhost:3002 host:bar.dn.sv name:proxy2 port:3002]
+  name: svc-proxy2
+  labels:
+    app.kubernetes.io/version: "1"
+    app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+        app.kubernetes.io/version: "1"
+        app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+---
+# Source: nginx-reverse-proxy/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fqdn
+  labels:
+    app.kubernetes.io/version: "1"
+    app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app.kubernetes.io/version: "1"
+        app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+  template:
+    metadata:
+      labels:
+            app.kubernetes.io/version: "1"
+            app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+    spec:
+      serviceAccountName: ngp-sa
+      securityContext:
+        {}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nginx-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+      containers:
+        - name: nginx-reverse-proxy
+          securityContext:
+            {}
+          image: "nginx:1.16.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            null
+          readinessProbe:
+            null
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1280Mi
+            requests:
+              cpu: 100m
+              memory: 1280Mi
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nginx/conf.d/vhost.conf #/etc/nginx/nginx.conf
+              subPath: nginx.conf
+---
+# Source: nginx-reverse-proxy/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "reverse-proxy-ingress"
+  labels:
+    app.kubernetes.io/version: "1"
+    app.kubernetes.io/managed-by: "nginx-reverse-proxy"
+spec:
+  ingressClassName: nginx
+  rules:
+      - host: "foo.dn.sv"
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: svc-proxy1
+                  port:
+                    number: 80
+      - host: "bar.dn.sv"
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: svc-proxy2
+                  port:
+                    number: 80
