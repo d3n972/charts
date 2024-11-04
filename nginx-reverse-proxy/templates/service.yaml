@@ -1,0 +1,19 @@
+{{- range .Values.ingress.hosts }}
+apiVersion: v1
+kind: Service
+metadata:
+# {{.}}
+  name: {{ print "svc-" .name | trunc 63 | trimSuffix "-" }}
+  labels:
+  {{- include "nginx-reverse-proxy.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{.port}}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ print "nginx-reverse-proxy-" .name | trunc 63 | trimSuffix "-" }}
+---
+{{- end }}
