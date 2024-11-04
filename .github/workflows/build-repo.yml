@@ -47,7 +47,7 @@ jobs:
           done
       - name: Index Helm Charts
         run: |
-          helm repo index .repo --url https://$GITHUB_REPOSITORY_OWNER.github.io/$GITHUB_REPOSITORY    
+          helm repo index .repo --url https://$GITHUB_REPOSITORY_OWNER.github.io/charts
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
