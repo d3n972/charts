@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vehiclescraper.fullname" . }}
+  labels:
+    {{- include "vehiclescraper.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "vehiclescraper.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "vehiclescraper.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      imagePullSecrets:
+        - name: {{ include "vehiclescraper.pullSecretName" . }}
+      serviceAccountName: {{ include "vehiclescraper.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ include "vehiclescraper.fullname" . }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "ghcr.io/d3n972/wehiclescrapper:arm"
+          imagePullPolicy: Always
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: mongodb-uri
+                  key: URI
+            - name: API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: vehicle-scraper-config
+                  key: API_URL
+            - name: FETCH_INTERVAL
+              valueFrom:
+                configMapKeyRef:
+                  name: vehicle-scraper-config
+                  key: FETCH_INTERVAL
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
