@@ -25,8 +25,8 @@ spec:
         - name: mongodb
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "mongo" #"arm64v8/mongo:4.4.8"
-          imagePullPolicy: Always
+          image: {{include "vehiclescraper.mongoImage" .}}
+          imagePullPolicy: IfNotPresent
           ports:
             - name: mongodb
               containerPort: 27017

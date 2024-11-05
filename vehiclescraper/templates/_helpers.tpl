@@ -31,6 +31,20 @@ If release name contains chart name it will be used as a full name.
 
 
 {{/*
+Select appropriate image based on architecture
+*/}}
+{{- define "vehiclescraper.mongoImage" -}}
+{{- if hasKey .Values "x64" }}
+{{- if .Values.x64 }}
+{{- .Values.image.x64 }}
+{{- else }}
+{{- .Values.image.arm64 }}
+{{- end }}
+{{- else }}
+"mongodb:latest"
+{{- end }}
+{{- end }}
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "vehiclescraper.chart" -}}
