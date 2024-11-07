@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 x64: true
 image:
-  x64: "mongodb:latest"
+  x64: "mongo:latest"
   arm64: "arm64v8/mongo:4.4.8"
 
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/

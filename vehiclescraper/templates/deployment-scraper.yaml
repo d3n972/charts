@@ -30,7 +30,7 @@ spec:
         - name: {{ include "vehiclescraper.fullname" . }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "ghcr.io/d3n972/wehiclescrapper:arm"
+          image: "ghcr.io/d3n972/wehiclescrapper:latest"
           imagePullPolicy: Always
           env:
             - name: MONGODB_URI
