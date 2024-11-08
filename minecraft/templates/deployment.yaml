@@ -43,10 +43,9 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            - name: {{ .Release.Name }}-pv
+              mountPath: /opt/app
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
