@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-mc" (include "minecraft.fullname" .) }}
+  labels:
+    {{- include "minecraft.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 25565
+      protocol: TCP
+      name: minecraft
+  selector:
+    {{- include "minecraft.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-rcon" (include "minecraft.fullname" .) }}
+  labels:
+    {{- include "minecraft.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 25575
+      protocol: TCP
+      name: rcon
+  selector:
+    {{- include "minecraft.selectorLabels" . | nindent 4 }}
