@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: privatebin
+  labels:
+  {{- include "privatebin.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: privatebin
+  template:
+    metadata:
+      labels:
+        app: privatebin
+    spec:
+      containers:
+      - name: privatebin
+        image: ghcr.io/privatebin/nginx-fpm-alpine:1.7.4
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: "/data"
+          name: privatebin-data
+        - mountPath: "/srv/cfg/conf.php"
+          configMap:
+            name: privatebin-config
+            items:
+            - key: config-file
+        env:
+        - name: TZ
+          value: "UTC" # Adjust as needed
+      volumes:
+      - name: privatebin-config
+        configMap:
+          name: privatebin-config
+      - name: privatebin-data
+        persistentVolumeClaim:
+          claimName: privatebin-pvc
