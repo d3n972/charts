@@ -95,7 +95,7 @@ jobs:
           done
 
           # End the HTML file
-          cat <<EOF >> $output_file
+          cat <<EOF >> index.html
               </table>
           </body>
           </html>
