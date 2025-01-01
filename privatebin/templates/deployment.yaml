@@ -16,18 +16,12 @@ spec:
     spec:
       containers:
       - name: privatebin
-        image: ghcr.io/privatebin/nginx-fpm-alpine:1.7.4
+        image: ghcr.io/privatebin/nginx-fpm-alpine
         ports:
         - containerPort: 8080
         volumeMounts:
         - mountPath: "/data"
           name: privatebin-data
-        - mountPath: "/srv/cfg/conf.php"
-          name: privatebin-config
-          configMap:
-            name: privatebin-config
-            items:
-            - key: config-file
         env:
         - name: TZ
           value: "UTC" # Adjust as needed
