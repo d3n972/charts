@@ -18,10 +18,10 @@ data:
     ; The full URL, with the domain name and directories that point to the
     ; PrivateBin files, including an ending slash (/). This URL is essential to
     ; allow Opengraph images to be displayed on social networks.
-    ; basepath = "https://privatebin.example.com/"
+    ; basepath = "https://pb.d3n.hu/"
 
     ; enable or disable the discussion feature, defaults to true
-    discussion = true
+    discussion = false
 
     ; preselect the discussion feature, defaults to false
     opendiscussion = false
@@ -48,7 +48,7 @@ data:
     ; syntaxhighlightingtheme = "sons-of-obsidian"
 
     ; size limit per paste or comment in bytes, defaults to 10 Mebibytes
-    sizelimit = 10485760
+    sizelimit = 910485760
 
     ; template to include, default is "bootstrap" (tpl/bootstrap.php), also
     ; available are "page" (tpl/page.php), the classic ZeroBin style and several
@@ -56,7 +56,7 @@ data:
     ; which can be combined with "-dark" and "-compact" for "bootstrap-dark-page"
     ; and finally "bootstrap-compact-page" - previews at:
     ; https://privatebin.info/screenshots.html
-    template = "bootstrap"
+    template = "bootstrap5"
 
     ; (optional) info text to display
     ; use single, instead of double quotes for HTML attributes
@@ -85,7 +85,7 @@ data:
 
     ; (optional) Let users send an email sharing the paste URL with one click.
     ; It works both when a new paste is created and when you view a paste.
-    ; email = true
+    email = false
 
     ; (optional) IP based icons are a weak mechanism to detect if a comment was from
     ; a different user when the same username was used in a comment. It might get
