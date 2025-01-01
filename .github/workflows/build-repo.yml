@@ -52,6 +52,10 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.repo'
+      - name: Generate index page
+        run: bash ./generate-index.sh
+      - name: Copy index page
+        run: cp index.html .repo/index.html
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
