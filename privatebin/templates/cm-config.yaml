@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "privatebin.labels" . | nindent 4 }}
 data:
-  config-file: |
+  conf.php: |
 ;<?php http_response_code(403); /*
 ; config file for PrivateBin
 ;

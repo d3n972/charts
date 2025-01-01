@@ -22,6 +22,12 @@ spec:
         volumeMounts:
         - mountPath: "/data"
           name: privatebin-data
+        - mountPath: "/srv/cfg"
+          name: privatebin-config
+          configMap:
+            name: privatebin-config
+            items:
+            - key: conf.php
         env:
         - name: TZ
           value: "UTC" # Adjust as needed
