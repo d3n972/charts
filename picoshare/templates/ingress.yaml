@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "picoshare.fullname" . }}
+  labels:
+    {{- include "picoshare.labels" . | nindent 4 }}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ps.d3n.hu # Replace with your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: picoshare
+                port:
+                  number: 80
