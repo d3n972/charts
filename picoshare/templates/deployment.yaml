@@ -34,7 +34,7 @@ spec:
           image: "mtlynch/picoshare"
           imagePullPolicy: IfNotPresent
           ports:
-            - name: http
+            - name: web
               containerPort: 4001
               protocol: TCP
           env:
