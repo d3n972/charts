@@ -34,8 +34,8 @@ spec:
           image: "mtlynch/picoshare"
           imagePullPolicy: IfNotPresent
           ports:
-            - name: web
-              containerPort: 4001
+            - name: http
+              containerPort: 80
               protocol: TCP
           env:
             - name: PS_SHARED_SECRET
@@ -44,7 +44,7 @@ spec:
                   name: {{ include "picoshare.fullname" . }}
                   key: PS_SHARED_SECRET
             - name: PS_PORT
-              value: "4001"
+              value: "80"
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
