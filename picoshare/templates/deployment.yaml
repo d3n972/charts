@@ -32,7 +32,6 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "mtlynch/picoshare"
-          command: ["-db", "/data/store.db"]
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
