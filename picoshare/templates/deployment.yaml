@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 4001
               protocol: TCP
           env:
             - name: PS_SHARED_SECRET
