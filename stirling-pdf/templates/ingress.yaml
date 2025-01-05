@@ -10,6 +10,7 @@ metadata:
   labels:
     {{- include "stirling-pdf.labels" . | nindent 4 }}
 spec:
+  ingressClassName: nginx
   rules:
     {{- range .Values.ingress.hosts }}
     - host: {{ .host }}
