@@ -1,0 +1,66 @@
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-training-data
+  labels:
+    {{- include "stirling-pdf.labels" . | nindent 4 }}
+spec:
+  accessModes: {{ .Values.persistence.accessModes | toYaml | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+  storageClassName: {{ .Values.persistence.storageClass }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-extra-configs
+  labels:
+    {{- include "stirling-pdf.labels" . | nindent 4 }}
+spec:
+  accessModes: {{ .Values.persistence.accessModes | toYaml | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+  storageClassName: {{ .Values.persistence.storageClass }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-custom-files
+  labels:
+    {{- include "stirling-pdf.labels" . | nindent 4 }}
+spec:
+  accessModes: {{ .Values.persistence.accessModes | toYaml | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+  storageClassName: {{ .Values.persistence.storageClass }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-logs
+  labels:
+    {{- include "stirling-pdf.labels" . | nindent 4 }}
+spec:
+  accessModes: {{ .Values.persistence.accessModes | toYaml | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+  storageClassName: {{ .Values.persistence.storageClass }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-pipeline
+  labels:
+    {{- include "stirling-pdf.labels" . | nindent 4 }}
+spec:
+  accessModes: {{ .Values.persistence.accessModes | toYaml | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+  storageClassName: {{ .Values.persistence.storageClass }}
+{{- end }}

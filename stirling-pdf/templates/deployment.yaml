@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-stirling-pdf
+  labels:
+    {{- include "stirling-pdf.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "stirling-pdf.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: stirling-pdf
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DOCKER_ENABLE_SECURITY
+              value: "false"
+            - name: INSTALL_BOOK_AND_ADVANCED_HTML_OPS
+              value: "false"
+            - name: LANGS
+              value: "en_GB"
+          volumeMounts:
+            - name: training-data
+              mountPath: /usr/share/tessdata
+            - name: extra-configs
+              mountPath: /configs
+            - name: custom-files
+              mountPath: /customFiles
+            - name: logs
+              mountPath: /logs
+            - name: pipeline
+              mountPath: /pipeline
+      volumes:
+        - name: training-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-training-data
+        - name: extra-configs
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-extra-configs
+        - name: custom-files
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-custom-files
+        - name: logs
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-logs
+        - name: pipeline
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pipeline
