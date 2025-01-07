@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "archivebox.fullname" . }}
+  labels:
+    {{- include "archivebox.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      name: http
+  selector:
+    {{- include "archivebox.selectorLabels" . | nindent 4 }}

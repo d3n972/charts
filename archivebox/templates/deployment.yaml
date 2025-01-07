@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "archivebox.fullname" . }}
+  labels:
+    {{- include "archivebox.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "archivebox.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "archivebox.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      initContainers:
+      - name: init-archivebox
+        image: archivebox/archivebox
+        args: ['init']
+        volumeMounts:
+          - mountPath: /data
+            name: archivebox
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "archivebox/archivebox"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: archivebox
+          volumes:
+          - name: archivebox
+            persistentVolumeClaim:
+              claimName: archivebox
