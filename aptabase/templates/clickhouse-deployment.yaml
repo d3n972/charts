@@ -1,0 +1,62 @@
+{{- if .Values.clickhouse.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aptabase.clickhouseFullname" . }}
+  labels:
+    {{- include "aptabase.labels" . | nindent 4 }}
+    app.kubernetes.io/component: events-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "aptabase.componentSelectorLabels" (dict "component" "events-db" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "aptabase.labels" . | nindent 8 }}
+        app.kubernetes.io/component: events-db
+    spec:
+      containers:
+        - name: clickhouse
+          image: "{{ .Values.clickhouse.image.repository }}:{{ .Values.clickhouse.image.tag }}"
+          imagePullPolicy: {{ .Values.clickhouse.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - ulimit -n {{ .Values.clickhouse.ulimits.nofile.soft }} && exec /entrypoint.sh
+          ports:
+            - name: http
+              containerPort: {{ .Values.clickhouse.service.httpPort }}
+              protocol: TCP
+            - name: native
+              containerPort: {{ .Values.clickhouse.service.nativePort }}
+              protocol: TCP
+          env:
+            - name: CLICKHOUSE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "aptabase.secretsName" . }}
+                  key: CLICKHOUSE_USER
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "aptabase.secretsName" . }}
+                  key: CLICKHOUSE_PASSWORD
+          {{- with .Values.clickhouse.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.clickhouse.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clickhouse
+          {{- end }}
+      {{- if .Values.clickhouse.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "aptabase.clickhouseFullname" . }}
+      {{- end }}
+{{- end }}

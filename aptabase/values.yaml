@@ -1,0 +1,109 @@
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+secrets:
+  create: true
+  authSecret: c4rI4x8kz5DgKJ1is5Eiu9bNncSQ6ROD
+
+aptabase:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/aptabase/aptabase
+    pullPolicy: IfNotPresent
+    tag: main
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8080
+  baseUrl: http://localhost:8000
+  resources: {}
+  livenessProbe: {}
+  readinessProbe: {}
+
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 15-alpine
+    pullPolicy: IfNotPresent
+  auth:
+    username: aptabase
+    password: sTr0NGp4ssw0rd
+    database: aptabase
+  service:
+    port: 5432
+  persistence:
+    enabled: true
+    storageClassName: ""
+    size: 10Gi
+  resources: {}
+
+clickhouse:
+  enabled: true
+  image:
+    repository: clickhouse/clickhouse-server
+    tag: 23.8.4.69-alpine
+    pullPolicy: IfNotPresent
+  auth:
+    username: aptabase
+    password: sTr0NGp4ssw0rd
+  service:
+    httpPort: 8123
+    nativePort: 9000
+  persistence:
+    enabled: true
+    storageClassName: ""
+    size: 10Gi
+  ulimits:
+    nofile:
+      soft: 262144
+      hard: 262144
+  resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+  - name: gateway
+    sectionName: http
+  hostnames:
+  - chart-example.local
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /

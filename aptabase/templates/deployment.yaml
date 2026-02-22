@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aptabase.appFullname" . }}
+  labels:
+    {{- include "aptabase.labels" . | nindent 4 }}
+    app.kubernetes.io/component: app
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.aptabase.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "aptabase.componentSelectorLabels" (dict "component" "app" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "aptabase.labels" . | nindent 8 }}
+        app.kubernetes.io/component: app
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "aptabase.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: aptabase
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.aptabase.image.repository }}:{{ .Values.aptabase.image.tag }}"
+          imagePullPolicy: {{ .Values.aptabase.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.aptabase.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: BASE_URL
+              value: {{ .Values.aptabase.baseUrl | quote }}
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "aptabase.secretsName" . }}
+                  key: AUTH_SECRET
+            - name: DATABASE_URL
+              value: {{ printf "Server=%s;Port=%v;User Id=%s;Password=%s;Database=%s" (include "aptabase.postgresFullname" .) .Values.postgres.service.port .Values.postgres.auth.username .Values.postgres.auth.password .Values.postgres.auth.database | quote }}
+            - name: CLICKHOUSE_URL
+              value: {{ printf "Host=%s;Port=%v;Username=%s;Password=%s" (include "aptabase.clickhouseFullname" .) .Values.clickhouse.service.httpPort .Values.clickhouse.auth.username .Values.clickhouse.auth.password | quote }}
+          {{- with .Values.aptabase.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.aptabase.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.aptabase.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

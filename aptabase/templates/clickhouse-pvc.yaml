@@ -1,0 +1,18 @@
+{{- if and .Values.clickhouse.enabled .Values.clickhouse.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "aptabase.clickhouseFullname" . }}
+  labels:
+    {{- include "aptabase.labels" . | nindent 4 }}
+    app.kubernetes.io/component: events-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.clickhouse.persistence.size }}
+  {{- if .Values.clickhouse.persistence.storageClassName }}
+  storageClassName: {{ .Values.clickhouse.persistence.storageClassName }}
+  {{- end }}
+{{- end }}
